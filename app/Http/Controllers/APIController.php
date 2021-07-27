@@ -55,7 +55,8 @@ class APIController extends Controller
                 ]);
             } else {
                 return response()->json([
-                    'message' => 'Failed',
+                    'message' => 'Failed when insert data',
+                    'status' => 'failed',
                     'code' => 404
                 ]);
             }
@@ -63,22 +64,51 @@ class APIController extends Controller
             if ($users_query) {
                 return response()->json([
                     'message' => 'success',
+                    'status' => 'success',
                     'code' => 200
                     // 200 OK
                 ]);
             } else {
                 return response()->json([
                     'message' => 'Failed',
+                    'status' => 'failed',
                     'code' => 404
                 ]);
             }
         } else {
             return response()->json([
                 'message' => 'Username Already Registered',
+                'status' => 'failed',
                 'code' => 202
             ]);
         }
-
-        
     }
+
+    /* Check Login */
+    public function checkLogin(Request $req) {
+        $username = $req->username;
+        $password = md5($req->password);
+        $tipe_user = $req->tipe_user;
+
+        $checkLogin = DB::table('tb_user')
+        ->where('username', $username)
+        ->where('password', $password)
+        ->where('tipe_user', $tipe_user);
+
+        if ($checkLogin->count() == 0) {
+            return response()->json([
+                'message' => 'Username / Password Salah',
+                'status' => 'failed',
+                'code' => 202
+            ]);
+        } else {
+            return response()->json([
+                'message' => 'Login Berhasil',
+                'status' => 'success',
+                'code' => 200
+                // OK
+            ]);
+        }
+    }
+
 }

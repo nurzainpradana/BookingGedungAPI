@@ -21,4 +21,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 // Registrasi Akun Baru
 Route::post('registrasi_akun','APIController@registrasiAkun');
 
+// Check Login
+Route::post('check_login','APIController@checkLogin');
+
 
