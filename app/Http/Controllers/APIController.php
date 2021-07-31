@@ -111,4 +111,42 @@ class APIController extends Controller
         }
     }
 
+    /* Upload Photo */
+    public function uploadPhoto(Request $req) {
+
+        //get image string posted from android app
+        $imgPath = $req->imgPath;
+
+        //get file name posted from android app
+        $imgName = $req->imgName;
+
+        // $img = Image::make($imgPath)->fit(300);
+
+        // //Decode Image
+        $binary = base64_decode($imgPath);
+
+        header('Content-Type: bitmap; charset=utf-8');
+
+        // //images will be saved under folder img
+        $file = fopen(public_path("photo_upload/".$imgName), 'wb');
+
+        fwrite($file, $binary);
+        fclose($file);
+
+        if ($file != null) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Succes Upload Photo',
+                'code' => 200
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'failed',
+                'message' => 'Failed When Upload Photo',
+                'code' => 404
+            ]);
+        }
+
+    }
+
 }

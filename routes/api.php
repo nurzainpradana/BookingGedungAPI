@@ -24,4 +24,6 @@ Route::post('registrasi_akun','APIController@registrasiAkun');
 // Check Login
 Route::post('check_login','APIController@checkLogin');
 
+// Upload Photo Gedung
+Route::post('upload_photo','APIController@uploadPhoto');
 
