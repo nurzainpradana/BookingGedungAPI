@@ -8,7 +8,8 @@ use Illuminate\Support\Facades\DB;
 class APIController extends Controller
 {
     /* Registrasi Akun Baru */
-    public function registrasiAkun(Request $req) {
+    public function registrasiAkun(Request $req)
+    {
         $nama = $req->nama;
         $username = $req->username;
         $email = $req->email;
@@ -20,8 +21,8 @@ class APIController extends Controller
 
         // Check Username apakah sudah terdaftar atau belum
         $check_username = DB::table('tb_user')->where('username', $username)->count();
-        if ($check_username == 0 ) {
-            if($tipe_user == 'customer') {
+        if ($check_username == 0) {
+            if ($tipe_user == 'customer') {
                 $users_query = DB::table('tb_user')->insert([
                     'nama' => $nama,
                     'username' => $username,
@@ -33,12 +34,12 @@ class APIController extends Controller
                     'tipe_user' => $tipe_user,
                     'flag' => 1
                 ]);
-            } else if ($tipe_user == 'pemilik'){
-    
+            } else if ($tipe_user == 'pemilik') {
+
                 $no_rek = $req->no_rekening;
                 $nama_bank = $req->nama_bank;
                 $nama_rekening = $req->nama_pemilik;
-                
+
                 $users_query = DB::table('tb_user')->insert([
                     'nama' => $nama,
                     'username' => $username,
@@ -60,7 +61,7 @@ class APIController extends Controller
                     'code' => 404
                 ]);
             }
-    
+
             if ($users_query) {
                 return response()->json([
                     'message' => 'success',
@@ -85,15 +86,16 @@ class APIController extends Controller
     }
 
     /* Check Login */
-    public function checkLogin(Request $req) {
+    public function checkLogin(Request $req)
+    {
         $username = $req->username;
         $password = md5($req->password);
         $tipe_user = $req->tipe_user;
 
         $checkLogin = DB::table('tb_user')
-        ->where('username', $username)
-        ->where('password', $password)
-        ->where('tipe_user', $tipe_user);
+            ->where('username', $username)
+            ->where('password', $password)
+            ->where('tipe_user', $tipe_user);
 
         if ($checkLogin->count() == 0) {
             return response()->json([
@@ -112,7 +114,8 @@ class APIController extends Controller
     }
 
     /* Upload Photo */
-    public function uploadPhoto(Request $req) {
+    public function uploadPhoto(Request $req)
+    {
 
         //get image string posted from android app
         $imgPath = $req->imgPath;
@@ -128,7 +131,7 @@ class APIController extends Controller
         header('Content-Type: bitmap; charset=utf-8');
 
         // //images will be saved under folder img
-        $file = fopen(public_path("photo_upload/".$imgName), 'wb');
+        $file = fopen(public_path("photo_upload/" . $imgName), 'wb');
 
         fwrite($file, $binary);
         fclose($file);
@@ -146,7 +149,89 @@ class APIController extends Controller
                 'code' => 404
             ]);
         }
-
     }
 
+    /* Registrasi Akun Baru */
+    public function buatGedungBaru(Request $req)
+    {
+        $nama               = $req->nama;
+        $gambar             = $req->gambar;
+        $kapasitas          = $req->kapasitas;
+        $fasilitas          = $req->fasilitas;
+        $jam_operasional    = $req->jam_operasional;
+        $maps               = $req->maps;
+        $harga              = $req->harga;
+        $pemilik            = $req->pemilik;
+
+        // Check Username apakah sudah terdaftar atau belum
+        $check_name = DB::table('tb_gedung')->where('nama', $nama)->count();
+        if ($check_name == 0) {
+            $query = DB::table('tb_gedung')->insert([
+                'nama' => $nama,
+                'gambar' => $gambar,
+                'kapasitas' => $kapasitas,
+                'fasilitas' => $fasilitas,
+                'jam_operasional' => $jam_operasional,
+                'maps' => $maps,
+                'harga' => $harga,
+                'pemilik' => $pemilik
+            ]);
+
+            if ($query) {
+                return response()->json([
+                    'message' => 'success',
+                    'status' => 'success',
+                    'code' => 200
+                    // 200 OK
+                ]);
+            } else {
+                return response()->json([
+                    'message' => 'Failed',
+                    'status' => 'failed',
+                    'code' => 404
+                ]);
+            }
+        } else {
+            return response()->json([
+                'message' => 'Nama Gedung Already Registered',
+                'status' => 'failed',
+                'code' => 202
+            ]);
+        }
+    }
+
+    public function getGedungListPemilik(Request $req) {
+        $pemilik = $req->pemilik;
+
+        if($pemilik != "") {
+            $query = DB::table('tb_gedung')
+            ->where('pemilik', $pemilik)
+            ->where('flag', 1)
+            ->get();
+    
+            if ($query) {
+                return response()->json([
+                    'message' => 'success',
+                    'status' => 'success',
+                    'code' => 200,
+                    'listGedung' => $query
+                    // 200 OK
+                ]);
+            } else {
+                return response()->json([
+                    'message' => 'data tidak ditemukan',
+                    'status' => 'failed',
+                    'code' => 404
+                ]);
+            }
+        } else {
+            return response()->json([
+                'message' => 'failed',
+                'status' => 'failed',
+                'code' => 202
+            ]);
+        }
+
+        
+    }
 }

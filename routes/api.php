@@ -27,3 +27,8 @@ Route::post('check_login','APIController@checkLogin');
 // Upload Photo Gedung
 Route::post('upload_photo','APIController@uploadPhoto');
 
+// Buat Gedung Baru
+Route::post('buat_gedung_baru','APIController@buatGedungBaru');
+
+// Get Gedung List (Pemilik)
+Route::post('get_gedung_list_pemilik','APIController@getGedungListPemilik');
