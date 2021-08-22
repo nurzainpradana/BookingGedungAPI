@@ -32,3 +32,21 @@ Route::post('buat_gedung_baru','APIController@buatGedungBaru');
 
 // Get Gedung List (Pemilik)
 Route::post('get_gedung_list_pemilik','APIController@getGedungListPemilik');
+
+// Get Gedung List Filter (Pemilik)
+Route::post('get_gedung_list_pemilik_filter','APIController@getGedungListPemilikFilter');
+
+// Get Gedung List (Customer)
+Route::get('get_gedung_list_customer','APIController@getGedungListCustomer');
+
+// Get Gedung List Filter (Customer)
+Route::post('get_gedung_list_customer_filter','APIController@getGedungListCustomerFilter');
+
+
+// Get Detail Gedung
+Route::post('get_gedung_detail','APIController@getGedungDetail');
+
+// Check Booking Gedung
+Route::post('check_booking_gedung','APIController@checkBooking');
+
+

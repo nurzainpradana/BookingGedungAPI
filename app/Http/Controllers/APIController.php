@@ -200,11 +200,14 @@ class APIController extends Controller
         }
     }
 
+    // GET GEDUNG LIST PEMILIK
+
     public function getGedungListPemilik(Request $req) {
         $pemilik = $req->pemilik;
 
         if($pemilik != "") {
             $query = DB::table('tb_gedung')
+            ->select(DB::Raw('id, nama, gambar, kapasitas, rating, harga'))
             ->where('pemilik', $pemilik)
             ->where('flag', 1)
             ->get();
@@ -231,7 +234,229 @@ class APIController extends Controller
                 'code' => 202
             ]);
         }
+    }
+
+    public function getGedungListPemilikFilter(Request $req) {
+        // enable query log
+        DB::enableQueryLog();
+
+        $pemilik = $req->pemilik;
+        $filter_by = $req->filterBy;
+        
+
+        if($pemilik != "") {
+
+            $whereQuery = "";
+
+            switch ($filter_by) {
+                case "Harga < 3 Jt" : {
+                    $whereQuery = "`harga` <= 3000000";
+                    break;
+                }
+                case "Harga > 3 Jt" : {
+                    $whereQuery = "`harga` >= 3000000";
+                    break;
+                }
+                case "Kapasitas > 500" : {
+                    $whereQuery = "`kapasitas` >= 500";
+                    break;
+                }
+                case "Kapasitas < 500" : {
+                    $whereQuery = "`kapasitas` <= 500";
+                    break;
+                }
+            }
+
+            $query = DB::table('tb_gedung')
+            ->select(DB::Raw('id, nama, gambar, kapasitas, rating, harga'))
+            ->whereRaw($whereQuery . " && `pemilik` = '" . $pemilik . "' && `flag` = 1")
+            // ->where('pemilik', $pemilik)
+            // ->where('flag', 1)
+            ->get();
+
+            // display log query
+            // dd(DB::getQueryLog());
+    
+            if ($query) {
+                return response()->json([
+                    'message' => 'success',
+                    'status' => 'success',
+                    'code' => 200,
+                    'listGedung' => $query,
+                    'rawQuery' => $whereQuery,
+                    // 200 OK
+                ]);
+            } else {
+                return response()->json([
+                    'message' => 'data tidak ditemukan',
+                    'status' => 'failed',
+                    'code' => 404
+                ]);
+            }
+        } else {
+            return response()->json([
+                'message' => 'failed',
+                'status' => 'failed',
+                'code' => 202
+            ]);
+        }
 
         
+    }
+
+    
+    // GET GEDUNG LIST CUSTOMER
+
+    public function getGedungListCustomer() {
+        $query = DB::table('tb_gedung')
+            ->select(DB::Raw('id, nama, gambar, kapasitas, rating, harga'))
+            ->where('flag', 1)
+            ->get();
+    
+        if ($query) {
+            return response()->json([
+                'message' => 'success',
+                'status' => 'success',
+                'code' => 200,
+                'listGedung' => $query
+                    // 200 OK
+            ]);
+        } else {
+            return response()->json([
+                'message' => 'data tidak ditemukan',
+                'status' => 'failed',
+                'code' => 404
+            ]);
+        }
+    }
+
+    public function getGedungListCustomerFilter(Request $req) {
+        // enable query log
+        // DB::enableQueryLog();
+
+        $filter_by = $req->filterBy;
+        
+
+        $whereQuery = "";
+
+            switch ($filter_by) {
+                case "Harga < 3 Jt" : {
+                    $whereQuery = "`harga` <= 3000000";
+                    break;
+                }
+                case "Harga > 3 Jt" : {
+                    $whereQuery = "`harga` >= 3000000";
+                    break;
+                }
+                case "Kapasitas > 500" : {
+                    $whereQuery = "`kapasitas` >= 500";
+                    break;
+                }
+                case "Kapasitas < 500" : {
+                    $whereQuery = "`kapasitas` <= 500";
+                    break;
+                }
+            }
+
+            $query = DB::table('tb_gedung')
+            ->select(DB::Raw('id, nama, gambar, kapasitas, rating, harga'))
+            ->whereRaw($whereQuery . " && `flag` = 1")
+            // ->where('pemilik', $pemilik)
+            // ->where('flag', 1)
+            ->get();
+
+            // display log query
+            // dd(DB::getQueryLog());
+    
+            if ($query) {
+                return response()->json([
+                    'message' => 'success',
+                    'status' => 'success',
+                    'code' => 200,
+                    'listGedung' => $query,
+                    'rawQuery' => $whereQuery,
+                    // 200 OK
+                ]);
+            } else {
+                return response()->json([
+                    'message' => 'data tidak ditemukan',
+                    'status' => 'failed',
+                    'code' => 404
+                ]);
+            }
+    }
+
+    // GET GEDUNG DETAIL
+
+    public function getGedungDetail(Request $req) {
+        $idGedung = $req->idGedung;
+
+        if($idGedung != "") {
+            $query = DB::table('tb_gedung')
+            ->where('id', $idGedung)
+            ->first();
+    
+            if ($query) {
+                return response()->json([
+                    'message' => 'success',
+                    'status' => 'success',
+                    'code' => 200,
+                    'gedungDetail' => $query
+                    // 200 OK
+                ]);
+            } else {
+                return response()->json([
+                    'message' => 'data tidak ditemukan',
+                    'status' => 'failed',
+                    'code' => 404
+                ]);
+            }
+        } else {
+            return response()->json([
+                'message' => 'failed',
+                'status' => 'failed',
+                'code' => 202
+            ]);
+        }
+    }
+
+    public function checkBooking(Request $req) {
+        $id_gedung = $req->id_gedung;
+        $tgl_sewa = $req->tgl_sewa;
+
+        $query = DB::table('tb_booking')
+            ->where('tanggal_sewa', $tgl_sewa)
+            ->where('id_gedung', $id_gedung)
+            ->get('jam_sewa');
+
+        $query2 = DB::table('tb_gedung')
+            ->where('id', $id_gedung)
+            ->first('jam_operasional');
+
+        $jam_sudah_booking = "";
+        foreach($query as $item) {
+            if($jam_sudah_booking == ""){
+                $jam_sudah_booking = $jam_sudah_booking . $item->jam_sewa;
+            } else {
+                $jam_sudah_booking = $jam_sudah_booking . ", " . $item->jam_sewa;
+            }
+            
+        }
+
+        $data = array (
+            'jam_sudah_booking' => $jam_sudah_booking,
+            'jam_operasional' => $query2->jam_operasional
+        );
+
+        // echo $jam_sudah_booking;
+
+        return response()->json([
+            'message' => 'success',
+            'status' => 'success',
+            'data' => $data,
+            'code' => 202
+        ]);
+
+            
     }
 }
