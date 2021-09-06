@@ -459,4 +459,281 @@ class APIController extends Controller
 
             
     }
+
+    /* Registrasi Akun Baru */
+    public function bookingGedung(Request $req)
+    {
+        $id_gedung          = $req->id_gedung;
+        $username           = $req->username;
+        $tanggal_booking    = $req->tanggal_booking;
+        $tanggal_sewa       = $req->tanggal_sewa;
+        $waktu_sewa         = $req->waktu_sewa;
+        $biaya              = $req->biaya;
+        $status             = "Menunggu Pembayaran";
+
+        if ($id_gedung != null && $username != null) {
+            $query = DB::table('tb_booking')->insert([
+                'id_gedung'         => $id_gedung,
+                'username'           => $username,
+                'tanggal_booking'   => $tanggal_booking,
+                'tanggal_sewa'      => $tanggal_sewa,
+                'jam_sewa'        => $waktu_sewa,
+                'biaya'             => $biaya,
+                'status'            => $status
+            ]);
+
+            if ($query) {
+                $query2 = DB::table('tb_booking')
+                ->where('username', $username)
+                ->where('id_gedung', $id_gedung)
+                ->orderBy('id', 'DESC')
+                ->first('id');
+
+                if ($query2) {
+                    return response()->json([
+                        'message' => $query2->id,
+                        'status' => 'success',
+                        'code' => 200
+                        // 200 OK
+                    ]);
+                } else {
+                    return response()->json([
+                        'message' => null,
+                        'status' => 'success',
+                        'code' => 200
+                        // 200 OK
+                    ]);
+                }
+            } else {
+                return response()->json([
+                    'message' => 'Booking Failed',
+                    'status' => 'failed',
+                    'code' => 202
+                ]);
+            }
+        } else {
+            return response()->json([
+                'message' => 'Booking Failed',
+                'status' => 'failed',
+                'code' => 202
+            ]);
+        }
+    }
+
+    public function getBookingDetail(Request $req) {
+        $idBooking = $req->idBooking;
+
+        if($idBooking != "") {
+            $query = DB::table('tb_booking AS B')
+            ->selectRaw("B.id, G.nama as nama_gedung, P.nama_bank, P.no_rekening, P.nama_pemilik, C.nama as nama_customer, B.tanggal_sewa, B.jam_sewa, B.status")
+            ->leftJoin("tb_gedung AS G", "G.id", "B.id_gedung")
+            ->leftJoin("tb_user AS C", "C.username", "B.username")
+            ->leftJoin("tb_user AS P", "P.username", "G.pemilik")
+            ->where('B.id', $idBooking)
+            ->first();
+    
+            if ($query) {
+                return response()->json([
+                    'message' => 'success',
+                    'status' => 'success',
+                    'code' => 200,
+                    'bookingDetail' => $query
+                    // 200 OK
+                ]);
+            } else {
+                return response()->json([
+                    'message' => 'data tidak ditemukan',
+                    'status' => 'failed',
+                    'code' => 404
+                ]);
+            }
+        } else {
+            return response()->json([
+                'message' => 'failed',
+                'status' => 'failed',
+                'code' => 202
+            ]);
+        }
+    }
+
+    public function getAkunDetail(Request $req) {
+        $username = $req->username;
+
+        if($username != "") {
+            $query = DB::table('tb_user')
+            ->selectRaw('id, username, nama, email, password, no_hp, jenis_kelamin, alamat, tipe_user, no_rekening, nama_bank, nama_pemilik')
+            ->where('username', $username)
+            ->first();
+    
+            if ($query) {
+                return response()->json([
+                    'message' => 'success',
+                    'status' => 'success',
+                    'code' => 200,
+                    'akunDetail' => $query
+                    // 200 OK
+                ]);
+            } else {
+                return response()->json([
+                    'message' => 'data tidak ditemukan',
+                    'status' => 'failed',
+                    'code' => 404
+                ]);
+            }
+        } else {
+            return response()->json([
+                'message' => 'failed',
+                'status' => 'failed',
+                'code' => 202
+            ]);
+        }
+    }
+
+    public function getRiwayatBookingCustomer(Request $req) 
+    {
+        $username = $req->username;
+
+        if($username != "" || $username != null) {
+
+            $query = DB::table('tb_booking as B')
+            ->select(DB::Raw('B.id, G.nama as nama_gedung, C.nama as nama_customer, B.tanggal_sewa, B.status'))
+            ->leftJoin("tb_gedung AS G", "G.id", "B.id_gedung")
+            ->leftJoin("tb_user AS C", "C.username", "B.username")
+            ->where('B.username', $username)
+            ->get();
+    
+            if ($query) {
+                return response()->json([
+                    'message' => 'success',
+                    'status' => 'success',
+                    'code' => 200,
+                    'listRiwayatBooking' => $query
+                        // 200 OK
+                ]);
+            } else {
+                return response()->json([
+                    'message' => 'data tidak ditemukan',
+                    'status' => 'failed',
+                    'code' => 404
+                ]);
+            }
+        } else {
+            return response()->json([
+                'message' => 'Failed',
+                'status' => 'failed',
+                'code' => 404
+            ]);
+        }
+
+        
+    }
+
+    public function getRiwayatBookingPemilik(Request $req) 
+    {
+        $username = $req->username;
+
+        if($username != "" || $username != null) {
+
+            $query = DB::table('tb_booking as B')
+            ->select(DB::Raw('B.id, G.nama as nama_gedung, C.nama as nama_customer, B.tanggal_sewa, B.status'))
+            ->leftJoin("tb_gedung AS G", "G.id", "B.id_gedung")
+            ->leftJoin("tb_user AS C", "C.username", "B.username")
+            ->where('G.pemilik', $username)
+            ->get();
+    
+            if ($query) {
+                return response()->json([
+                    'message' => 'success',
+                    'status' => 'success',
+                    'code' => 200,
+                    'listRiwayatBooking' => $query
+                        // 200 OK
+                ]);
+            } else {
+                return response()->json([
+                    'message' => 'data tidak ditemukan',
+                    'status' => 'failed',
+                    'code' => 404
+                ]);
+            }
+        } else {
+            return response()->json([
+                'message' => 'Failed',
+                'status' => 'failed',
+                'code' => 404
+            ]);
+        }
+
+        
+    }
+
+    public function cancelBooking(Request $req) 
+    {
+        $idBooking = $req->id_booking;
+
+        if($idBooking != "" || $idBooking != null) {
+
+            $query = DB::table('tb_booking')
+            ->where('id', $idBooking)
+            ->update(
+                ["status" => "Batal"]
+            );
+    
+            if ($query) {
+                return response()->json([
+                    'message' => 'success',
+                    'status' => 'success',
+                    'code' => 200
+                        // 200 OK
+                ]);
+            } else {
+                return response()->json([
+                    'message' => 'data tidak ditemukan',
+                    'status' => 'failed',
+                    'code' => 404
+                ]);
+            }
+        } else {
+            return response()->json([
+                'message' => 'Failed',
+                'status' => 'failed',
+                'code' => 404
+            ]);
+        }
+    }
+
+    public function konfirmasiPembayaran(Request $req) 
+    {
+        $idBooking = $req->id_booking;
+
+        if($idBooking != "" || $idBooking != null) {
+
+            $query = DB::table('tb_booking')
+            ->where('id', $idBooking)
+            ->update(
+                ["status" => "Sudah Bayar"]
+            );
+    
+            if ($query) {
+                return response()->json([
+                    'message' => 'success',
+                    'status' => 'success',
+                    'code' => 200
+                        // 200 OK
+                ]);
+            } else {
+                return response()->json([
+                    'message' => 'data tidak ditemukan',
+                    'status' => 'failed',
+                    'code' => 404
+                ]);
+            }
+        } else {
+            return response()->json([
+                'message' => 'Failed',
+                'status' => 'failed',
+                'code' => 404
+            ]);
+        }
+    }
 }

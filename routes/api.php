@@ -49,4 +49,25 @@ Route::post('get_gedung_detail','APIController@getGedungDetail');
 // Check Booking Gedung
 Route::post('check_booking_gedung','APIController@checkBooking');
 
+// Check Booking Gedung
+Route::post('booking_gedung','APIController@bookingGedung');
 
+// Detail Booking Gedung
+Route::post('get_detail_booking','APIController@getBookingDetail');
+
+// Detail Akun
+Route::post('get_detail_akun','APIController@getAkunDetail');
+
+// Get Riwayat Booking Customer
+Route::post('get_riwayat_booking_customer','APIController@getRiwayatBookingCustomer');
+
+
+// Get Riwayat Booking Pemilik
+Route::post('get_riwayat_booking_pemilik','APIController@getRiwayatBookingPemilik');
+
+// Cancel Booking
+Route::post('cancel_booking','APIController@cancelBooking');
+
+
+// Cancel Booking
+Route::post('konfirmasi_pembayaran','APIController@konfirmasiPembayaran');
