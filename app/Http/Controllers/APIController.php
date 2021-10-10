@@ -10,14 +10,15 @@ class APIController extends Controller
     /* Registrasi Akun Baru */
     public function registrasiAkun(Request $req)
     {
-        $nama = $req->nama;
-        $username = $req->username;
-        $email = $req->email;
-        $password = md5($req->password);
-        $no_hp = $req->no_hp;
-        $jenis_kelamin = $req->jenis_kelamin;
-        $alamat = $req->alamat;
-        $tipe_user = $req->tipe_user;
+        $nama           = $req->name;
+        $username       = $req->username;
+        $email          = $req->email;
+        $password       = md5($req->password);
+        $no_hp          = $req->no_hp;
+        $jenis_kelamin  = $req->jenis_kelamin;
+        $alamat         = $req->alamat;
+        $tipe_user      = $req->tipe_user;
+        $tanggal= date("Y-m-d H:i:s");
 
         // Check Username apakah sudah terdaftar atau belum
         $check_username = DB::table('tb_user')->where('username', $username)->count();
@@ -32,13 +33,14 @@ class APIController extends Controller
                     'jenis_kelamin' => $jenis_kelamin,
                     'alamat' => $alamat,
                     'tipe_user' => $tipe_user,
-                    'flag' => 1
+                    'flag' => 1,
+                    'created_date'=>$tanggal
                 ]);
             } else if ($tipe_user == 'pemilik') {
 
-                $no_rek = $req->no_rekening;
-                $nama_bank = $req->nama_bank;
-                $nama_rekening = $req->nama_pemilik;
+                $no_rek         = $req->no_rek;
+                $nama_bank      = $req->nama_bank;
+                $nama_rekening  = $req->nama_pemilik;
 
                 $users_query = DB::table('tb_user')->insert([
                     'nama' => $nama,
@@ -52,7 +54,8 @@ class APIController extends Controller
                     'flag' => 1,
                     'no_rekening' => $no_rek,
                     'nama_bank' => $nama_bank,
-                    'nama_pemilik' => $nama_rekening
+                    'nama_pemilik' => $nama_rekening,
+                    'created_date'  =>  $tanggal
                 ]);
             } else {
                 return response()->json([
@@ -83,6 +86,119 @@ class APIController extends Controller
                 'code' => 202
             ]);
         }
+    }
+
+    /* Update Akun */
+    public function updateAkun(Request $req)
+    {
+        $nama           = $req->name;
+        $username       = $req->username;
+        $email          = $req->email;
+        $password       = md5($req->password);
+        $no_hp          = $req->no_hp;
+        $jenis_kelamin  = $req->jenis_kelamin;
+        $alamat         = $req->alamat;
+        $tipe_user      = $req->tipe_user;
+        $tanggal        = date("Y-m-d H:i:s");
+        $id             = $req->id;
+
+        // Check Username apakah sudah terdaftar atau belum
+            if ($tipe_user == 'customer') {
+                if ($password != "" || $password != null) {
+                    $users_query = DB::table('tb_user')
+                    ->where('username', $username)
+                    ->update([
+                        'nama' => $nama,
+                        'email' => $email,
+                        'password' => $password,
+                        'no_hp' => $no_hp,
+                        'jenis_kelamin' => $jenis_kelamin,
+                        'alamat' => $alamat,
+                        'tipe_user' => $tipe_user,
+                        'flag' => 1,
+                        'created_date'=>$tanggal
+                    ]);
+                } else {
+                    $users_query = DB::table('tb_user')
+                    ->where('username', $username)
+                    ->update([
+                        'nama' => $nama,
+                        'email' => $email,
+                        'no_hp' => $no_hp,
+                        'jenis_kelamin' => $jenis_kelamin,
+                        'alamat' => $alamat,
+                        'tipe_user' => $tipe_user,
+                        'flag' => 1,
+                        'created_date'=>$tanggal
+                    ]);
+                }
+                
+            } else if ($tipe_user == 'pemilik') {
+
+                $no_rek         = $req->no_rek;
+                $nama_bank      = $req->nama_bank;
+                $nama_rekening  = $req->nama_pemilik;
+
+                
+                if ($password != "" || $password != null) 
+                {
+                    $users_query = DB::table('tb_user')
+                    ->where('username', $username)
+                    ->update([
+                        'nama' => $nama,
+                        'email' => $email,
+                        'password' => $password,
+                        'no_hp' => $no_hp,
+                        'jenis_kelamin' => $jenis_kelamin,
+                        'alamat' => $alamat,
+                        'tipe_user' => $tipe_user,
+                        'flag' => 1,
+                        'no_rekening' => $no_rek,
+                        'nama_bank' => $nama_bank,
+                        'nama_pemilik' => $nama_rekening,
+                        'created_date'  =>  $tanggal
+                    ]);
+                } else {
+                    $users_query = DB::table('tb_user')
+                    ->where('username', $username)
+                    ->update([
+                        'nama' => $nama,
+                        'email' => $email,
+                        'no_hp' => $no_hp,
+                        'jenis_kelamin' => $jenis_kelamin,
+                        'alamat' => $alamat,
+                        'tipe_user' => $tipe_user,
+                        'flag' => 1,
+                        'no_rekening' => $no_rek,
+                        'nama_bank' => $nama_bank,
+                        'nama_pemilik' => $nama_rekening,
+                        'created_date'  =>  $tanggal
+                    ]);
+                }
+
+                
+            } else {
+                return response()->json([
+                    'message' => 'Failed when insert data',
+                    'status' => 'failed',
+                    'code' => 404
+                ]);
+            }
+
+            if ($users_query) {
+                return response()->json([
+                    'message' => 'success',
+                    'status' => 'success',
+                    'code' => 200
+                    // 200 OK
+                ]);
+            } else {
+                return response()->json([
+                    'message' => 'Failed',
+                    'status' => 'failed',
+                    'code' => 404
+                ]);
+            }
     }
 
     /* Check Login */
@@ -162,6 +278,7 @@ class APIController extends Controller
         $maps               = $req->maps;
         $harga              = $req->harga;
         $pemilik            = $req->pemilik;
+        $tanggal            = date("Y-m-d H:i:s");
 
         // Check Username apakah sudah terdaftar atau belum
         $check_name = DB::table('tb_gedung')->where('nama', $nama)->count();
@@ -174,7 +291,8 @@ class APIController extends Controller
                 'jam_operasional' => $jam_operasional,
                 'maps' => $maps,
                 'harga' => $harga,
-                'pemilik' => $pemilik
+                'pemilik' => $pemilik,
+                'created_date'  =>$tanggal
             ]);
 
             if ($query) {
@@ -207,7 +325,7 @@ class APIController extends Controller
 
         if($pemilik != "") {
             $query = DB::table('tb_gedung')
-            ->select(DB::Raw('id, nama, gambar, kapasitas, rating, harga'))
+            ->select(DB::Raw('id, nama, gambar, kapasitas, harga'))
             ->where('pemilik', $pemilik)
             ->where('flag', 1)
             ->get();
@@ -268,7 +386,7 @@ class APIController extends Controller
             }
 
             $query = DB::table('tb_gedung')
-            ->select(DB::Raw('id, nama, gambar, kapasitas, rating, harga'))
+            ->select(DB::Raw('id, nama, gambar, kapasitas, harga'))
             ->whereRaw($whereQuery . " && `pemilik` = '" . $pemilik . "' && `flag` = 1")
             // ->where('pemilik', $pemilik)
             // ->where('flag', 1)
@@ -295,7 +413,7 @@ class APIController extends Controller
             }
         } else {
             return response()->json([
-                'message' => 'failed',
+                'message' => 'failed', 
                 'status' => 'failed',
                 'code' => 202
             ]);
@@ -309,7 +427,7 @@ class APIController extends Controller
 
     public function getGedungListCustomer() {
         $query = DB::table('tb_gedung')
-            ->select(DB::Raw('id, nama, gambar, kapasitas, rating, harga'))
+            ->select(DB::Raw('id, nama, gambar, kapasitas, harga'))
             ->where('flag', 1)
             ->get();
     
@@ -359,7 +477,7 @@ class APIController extends Controller
             }
 
             $query = DB::table('tb_gedung')
-            ->select(DB::Raw('id, nama, gambar, kapasitas, rating, harga'))
+            ->select(DB::Raw('id, nama, gambar, kapasitas, harga'))
             ->whereRaw($whereQuery . " && `flag` = 1")
             // ->where('pemilik', $pemilik)
             // ->where('flag', 1)
@@ -427,6 +545,7 @@ class APIController extends Controller
         $query = DB::table('tb_booking')
             ->where('tanggal_sewa', $tgl_sewa)
             ->where('id_gedung', $id_gedung)
+            ->where('status', '!=', 'Batal')
             ->get('jam_sewa');
 
         $query2 = DB::table('tb_gedung')
@@ -639,6 +758,7 @@ class APIController extends Controller
             ->leftJoin("tb_gedung AS G", "G.id", "B.id_gedung")
             ->leftJoin("tb_user AS C", "C.username", "B.username")
             ->where('G.pemilik', $username)
+            ->orderBy('B.tanggal_sewa', 'DESC')
             ->get();
     
             if ($query) {
@@ -689,6 +809,41 @@ class APIController extends Controller
             } else {
                 return response()->json([
                     'message' => 'data tidak ditemukan',
+                    'status' => 'failed',
+                    'code' => 404
+                ]);
+            }
+        } else {
+            return response()->json([
+                'message' => 'Failed',
+                'status' => 'failed',
+                'code' => 404
+            ]);
+        }
+    }
+
+    public function hapusGedung(Request $req) 
+    {
+        $idGedung = $req->id_gedung;
+
+        if($idGedung != "" || $idGedung != null) {
+
+            $query = DB::table('tb_gedung')
+            ->where('id', $idGedung)
+            ->update(
+                ["flag" => "0"]
+            );
+    
+            if ($query) {
+                return response()->json([
+                    'message' => 'success',
+                    'status' => 'success',
+                    'code' => 200
+                        // 200 OK
+                ]);
+            } else {
+                return response()->json([
+                    'message' => 'data gagal dihapus',
                     'status' => 'failed',
                     'code' => 404
                 ]);

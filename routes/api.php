@@ -20,6 +20,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 // Registrasi Akun Baru
 Route::post('registrasi_akun','APIController@registrasiAkun');
+// Registrasi Akun Baru
+Route::post('update_akun','APIController@updateAkun');
 
 // Check Login
 Route::post('check_login','APIController@checkLogin');
@@ -71,3 +73,6 @@ Route::post('cancel_booking','APIController@cancelBooking');
 
 // Cancel Booking
 Route::post('konfirmasi_pembayaran','APIController@konfirmasiPembayaran');
+
+// Hapus Gedung
+Route::post('hapus_gedung','APIController@hapusGedung');
