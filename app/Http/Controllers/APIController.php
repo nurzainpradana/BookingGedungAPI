@@ -10,7 +10,7 @@ class APIController extends Controller
     /* Registrasi Akun Baru */
     public function registrasiAkun(Request $req)
     {
-        $nama           = $req->name;
+        $nama           = $req->nama;
         $username       = $req->username;
         $email          = $req->email;
         $password       = md5($req->password);
@@ -43,47 +43,47 @@ class APIController extends Controller
                 $nama_rekening  = $req->nama_pemilik;
 
                 $users_query = DB::table('tb_user')->insert([
-                    'nama' => $nama,
-                    'username' => $username,
-                    'email' => $email,
-                    'password' => $password,
-                    'no_hp' => $no_hp,
+                    'nama'          => $nama,
+                    'username'      => $username,
+                    'email'         => $email,
+                    'password'      => $password,
+                    'no_hp'         => $no_hp,
                     'jenis_kelamin' => $jenis_kelamin,
-                    'alamat' => $alamat,
-                    'tipe_user' => $tipe_user,
-                    'flag' => 1,
-                    'no_rekening' => $no_rek,
-                    'nama_bank' => $nama_bank,
-                    'nama_pemilik' => $nama_rekening,
+                    'alamat'        => $alamat,
+                    'tipe_user'     => $tipe_user,
+                    'flag'          => 1,
+                    'no_rekening'   => $no_rek,
+                    'nama_bank'     => $nama_bank,
+                    'nama_pemilik'  => $nama_rekening,
                     'created_date'  =>  $tanggal
                 ]);
             } else {
                 return response()->json([
-                    'message' => 'Failed when insert data',
-                    'status' => 'failed',
-                    'code' => 404
+                    'message'   => 'Failed when insert data',
+                    'status'    => 'failed',
+                    'code'      => 404
                 ]);
             }
 
             if ($users_query) {
                 return response()->json([
-                    'message' => 'success',
-                    'status' => 'success',
-                    'code' => 200
+                    'message'   => 'success',
+                    'status'    => 'success',
+                    'code'      => 200
                     // 200 OK
                 ]);
             } else {
                 return response()->json([
-                    'message' => 'Failed',
-                    'status' => 'failed',
-                    'code' => 404
+                    'message'   => 'Failed',
+                    'status'    => 'failed',
+                    'code'      => 404
                 ]);
             }
         } else {
             return response()->json([
-                'message' => 'Username Already Registered',
-                'status' => 'failed',
-                'code' => 202
+                'message'   => 'Username Already Registered',
+                'status'    => 'failed',
+                'code'      => 202
             ]);
         }
     }
@@ -91,10 +91,12 @@ class APIController extends Controller
     /* Update Akun */
     public function updateAkun(Request $req)
     {
-        $nama           = $req->name;
+        $nama           = $req->nama;
         $username       = $req->username;
         $email          = $req->email;
-        $password       = md5($req->password);
+        if(isset($req->password) || $req->password != null || $req->password != "" ) {
+            $password       = md5($req->password);
+        }
         $no_hp          = $req->no_hp;
         $jenis_kelamin  = $req->jenis_kelamin;
         $alamat         = $req->alamat;
@@ -104,7 +106,7 @@ class APIController extends Controller
 
         // Check Username apakah sudah terdaftar atau belum
             if ($tipe_user == 'customer') {
-                if ($password != "" || $password != null) {
+                if (isset($password)) {
                     $users_query = DB::table('tb_user')
                     ->where('username', $username)
                     ->update([
